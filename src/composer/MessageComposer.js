@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useRef } from "react";
 import { get_place_holders } from "../fakeAPI/placeholders";
 import { Title, Wrapper } from "./styles";
 import { TextEditor } from "./TextEditor";
@@ -10,6 +10,7 @@ const editTextInitialValue      = "";
 const holdersLengthInitialValue = 0;
 
 const MessageComposer = () => {
+	const textBoxRef                         = useRef ();
 	const [placeHolders, setPlaceHolders]   = useState ();
 	const [holdersLength, setHoldersLength] = useState (holdersLengthInitialValue);
 	const [editText, setEditText]           = useState (editTextInitialValue);
@@ -43,7 +44,10 @@ const MessageComposer = () => {
 			...prevState,
 			[ item.key ]: { ...prevState[ item.key ], used: true }
 		} ))
-		setEditText (editText.concat (item.templateString));
+		
+		const insertIndex = textBoxRef.current.selectionStart;
+		const newText = editText.substring(0, insertIndex).concat(item.templateString, editText.substring(insertIndex));
+		setEditText(newText);
 	}
 	
 	const handleTyping = evt => {
@@ -65,7 +69,7 @@ const MessageComposer = () => {
 	return (
 		<Wrapper>
 			<Title>Commpeak ReactJS practical task</Title>
-			<TextEditor reset={ reset } handleTyping={ handleTyping } editText={ editText }/>
+			<TextEditor textBoxRef={ textBoxRef } reset={ reset } handleTyping={ handleTyping } editText={ editText }/>
 			<CounterLine editText={ editText } holdersLength={ holdersLength }/>
 			<PlaceHolders placeHolders={ placeHolders } addPlaceHolder={ addPlaceHolder }/>
 			{ placeHolders && <PreviewDisplay editText={ editText } placeHolders={ placeHolders }/> }
